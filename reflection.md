@@ -5,8 +5,10 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 ## 1. What was broken when you started?
 
 - What did the game look like the first time you ran it?
+    It worked well. Nothing seems out of place. But the attempt left didn't get deduceted for the first time. 
 - List at least two concrete bugs you noticed at the start  
   (for example: "the secret number kept changing" or "the hints were backwards").
+    The hint was saying opposite. 
 
 ---
 
