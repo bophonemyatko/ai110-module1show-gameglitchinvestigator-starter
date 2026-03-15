@@ -168,14 +168,19 @@ if st.session_state.status != "playing":
 if submit:
     st.session_state.last_hint = None     # FIXEDBUG: clear previous hint so old messages don't linger
     st.session_state.last_error = None    # FIXEDBUG: clear previous error so old messages don't linger
-    st.session_state.attempts += 1
 
     ok, guess_int, err = parse_guess(raw_guess)
 
     if not ok:
-        st.session_state.history.append(raw_guess)
-        st.session_state.last_error = err     # FIXEDBUG: store error in state instead of calling st.error() directly
+        # FIXEDBUG: Invalid input (empty or non-number) — do NOT increment attempts, add to history,
+        # or affect score. Just prompt the user to guess within the valid range.
+        st.session_state.last_error = f"Invalid input. Please guess a number within range ({low} to {high})."
+    elif guess_int < low or guess_int > high:
+        # FIXEDBUG: Out-of-range guess — do NOT increment attempts, add to history, or affect score.
+        # Just show a reminder message so the player knows the valid range.
+        st.session_state.last_error = f"Out of range. Please guess within range ({low} to {high})."
     else:
+        st.session_state.attempts += 1
         st.session_state.history.append(guess_int)
 
         # FIXEDBUG: always use integer secret — removed the even/odd parity check that was
