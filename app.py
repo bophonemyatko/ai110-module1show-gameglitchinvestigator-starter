@@ -6,9 +6,9 @@ def get_range_for_difficulty(difficulty: str):
     if difficulty == "Easy":
         return 1, 20
     if difficulty == "Normal":
-        return 1, 100
+        return 1, 50          # before 100
     if difficulty == "Hard":
-        return 1, 50
+        return 1, 100         # before 50
     return 1, 100
 
 
@@ -61,7 +61,7 @@ difficulty = st.sidebar.selectbox(
 )
 
 attempt_limit_map = {
-    "Easy": 6,
+    "Easy": 10,     #Before 6
     "Normal": 8,
     "Hard": 5,
 }
@@ -76,7 +76,7 @@ if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
 if "attempts" not in st.session_state:
-    st.session_state.attempts = 1
+    st.session_state.attempts = 0        # was 1 before
 
 if "score" not in st.session_state:
     st.session_state.score = 0
@@ -114,9 +114,13 @@ with col2:
 with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
+#FIXEDBUG: Have to change satus back to "playing"
+#FIXEDBUG: Reset history to advoid stacking up old guesses
 if new_game:
     st.session_state.attempts = 0
     st.session_state.secret = random.randint(1, 100)
+    st.session_state.status = "playing"   # 
+    st.session_state.history = []         #
     st.success("New game started.")
     st.rerun()
 
