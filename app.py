@@ -32,7 +32,7 @@ def parse_guess(raw: str):
 
 def update_score(current_score: int, outcome: str, attempt_number: int):
     if outcome == "Win":
-        points = 100 - 10 * (attempt_number - 1)    #+1 -> -1
+        points = 100 - 10 * (attempt_number - 1)    # FIXEDBUG: was +1, giving only 80pts on 1st guess. Changed to -1 so 1st guess gives 100pts, 2nd gives 90pts, etc.
         if points < 10:
             points = 10
         return current_score + points
@@ -90,6 +90,15 @@ if "status" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
+# FIXEDBUG: Added last_hint and last_error to session state so hint/error messages
+# persist across st.rerun(). Without this, calling st.rerun() after submit would
+# wipe any st.warning()/st.error() called inside the submit block before they rendered.
+if "last_hint" not in st.session_state:
+    st.session_state.last_hint = None
+
+if "last_error" not in st.session_state:
+    st.session_state.last_error = None
+
 # Reset game when difficulty changes
 if st.session_state.difficulty != difficulty:
     st.session_state.difficulty = difficulty
@@ -98,11 +107,13 @@ if st.session_state.difficulty != difficulty:
     st.session_state.score = 0
     st.session_state.status = "playing"
     st.session_state.history = []
+    st.session_state.last_hint = None     # FIXEDBUG: clear leftover hint when difficulty changes
+    st.session_state.last_error = None    # FIXEDBUG: clear leftover error when difficulty changes
 
 st.subheader("Make a guess")
 
 st.info(
-    f"Guess a number between {low} and {high}. "   #fixed to match difficulity
+    f"Guess a number between {low} and {high}. "   #FIXEDBUG: to match difficulity
     f"Attempts left: {attempt_limit - st.session_state.attempts}"
 )
 
@@ -134,33 +145,47 @@ if new_game:
     st.session_state.secret = random.randint(low, high) # change 0,100 -> low, high to match difficulity
     st.session_state.status = "playing"   #
     st.session_state.history = []         #
-    st.success("New game started.")
+    st.session_state.last_hint = None     # FIXEDBUG: clear leftover hint on new game
+    st.session_state.last_error = None    # FIXEDBUG: clear leftover error on new game
     st.rerun()
 
+# FIXEDBUG: Updated win/loss messages to show the secret number and final score,
+# since those messages were moved out of the submit block (which no longer re-runs after st.rerun()).
 if st.session_state.status != "playing":
     if st.session_state.status == "won":
-        st.success("You already won. Start a new game to play again.")
+        st.balloons()
+        st.success(
+            f"You won! The secret was {st.session_state.secret}. "
+            f"Final score: {st.session_state.score}. Start a new game to play again."
+        )
     else:
-        st.error("Game over. Start a new game to try again.")
+        st.error(
+            f"Out of attempts! The secret was {st.session_state.secret}. "
+            f"Score: {st.session_state.score}. Start a new game to try again."
+        )
     st.stop()
 
 if submit:
+    st.session_state.last_hint = None     # FIXEDBUG: clear previous hint so old messages don't linger
+    st.session_state.last_error = None    # FIXEDBUG: clear previous error so old messages don't linger
     st.session_state.attempts += 1
 
     ok, guess_int, err = parse_guess(raw_guess)
 
     if not ok:
         st.session_state.history.append(raw_guess)
-        st.error(err)
+        st.session_state.last_error = err     # FIXEDBUG: store error in state instead of calling st.error() directly
     else:
         st.session_state.history.append(guess_int)
 
-        secret = st.session_state.secret            # changed this
+        # FIXEDBUG: always use integer secret — removed the even/odd parity check that was
+        # casting secret to a string on even attempts, causing wrong lexicographic hints
+        secret = st.session_state.secret
 
         outcome, message = check_guess(guess_int, secret)
 
         if show_hint:
-            st.warning(message)
+            st.session_state.last_hint = message  # FIXEDBUG: store hint in state instead of calling st.warning() directly
 
         st.session_state.score = update_score(
             current_score=st.session_state.score,
@@ -169,20 +194,25 @@ if submit:
         )
 
         if outcome == "Win":
-            st.balloons()
             st.session_state.status = "won"
-            st.success(
-                f"You won! The secret was {st.session_state.secret}. "
-                f"Final score: {st.session_state.score}"
-            )
         else:
             if st.session_state.attempts >= attempt_limit:
                 st.session_state.status = "lost"
-                st.error(
-                    f"Out of attempts! "
-                    f"The secret was {st.session_state.secret}. "
-                    f"Score: {st.session_state.score}"
-                )
+
+    # FIXEDBUG: Force a fresh re-render so that the attempts counter, debug info, and history
+    # (all rendered above this block) reflect the updated session state from this submit.
+    # Without st.rerun(), Streamlit's top-to-bottom rendering means those elements already
+    # rendered with stale values before this block executed.
+    st.rerun()
+
+# FIXEDBUG: Display hint and error here (after st.rerun()) so they render with the updated state.
+# Previously these were called inside the submit block with st.warning()/st.error(), but
+# st.rerun() discards any output rendered mid-run, so messages were lost.
+if st.session_state.last_error:
+    st.error(st.session_state.last_error)
+
+if st.session_state.last_hint:
+    st.warning(st.session_state.last_hint)
 
 st.divider()
 st.caption("Built by an AI that claims this code is production-ready.")
