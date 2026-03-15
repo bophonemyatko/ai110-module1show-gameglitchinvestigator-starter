@@ -32,7 +32,7 @@ def parse_guess(raw: str):
 
 def update_score(current_score: int, outcome: str, attempt_number: int):
     if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
+        points = 100 - 10 * (attempt_number - 1)    #+1 -> -1
         if points < 10:
             points = 10
         return current_score + points
@@ -130,8 +130,9 @@ with col3:
 #FIXEDBUG: Reset history to advoid stacking up old guesses
 if new_game:
     st.session_state.attempts = 0
+    st.session_state.score = 0            # this added
     st.session_state.secret = random.randint(low, high) # change 0,100 -> low, high to match difficulity
-    st.session_state.status = "playing"   # 
+    st.session_state.status = "playing"   #
     st.session_state.history = []         #
     st.success("New game started.")
     st.rerun()
@@ -154,10 +155,7 @@ if submit:
     else:
         st.session_state.history.append(guess_int)
 
-        if st.session_state.attempts % 2 == 0:
-            secret = str(st.session_state.secret)
-        else:
-            secret = st.session_state.secret
+        secret = st.session_state.secret            # changed this
 
         outcome, message = check_guess(guess_int, secret)
 
