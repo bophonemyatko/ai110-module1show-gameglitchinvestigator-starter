@@ -72,6 +72,9 @@ low, high = get_range_for_difficulty(difficulty)
 st.sidebar.caption(f"Range: {low} to {high}")
 st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 
+if "difficulty" not in st.session_state:
+    st.session_state.difficulty = difficulty
+
 if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
@@ -87,10 +90,19 @@ if "status" not in st.session_state:
 if "history" not in st.session_state:
     st.session_state.history = []
 
+# Reset game when difficulty changes
+if st.session_state.difficulty != difficulty:
+    st.session_state.difficulty = difficulty
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.attempts = 0
+    st.session_state.score = 0
+    st.session_state.status = "playing"
+    st.session_state.history = []
+
 st.subheader("Make a guess")
 
 st.info(
-    f"Guess a number between 1 and 100. "
+    f"Guess a number between {low} and {high}. "   #fixed to match difficulity
     f"Attempts left: {attempt_limit - st.session_state.attempts}"
 )
 
@@ -118,7 +130,7 @@ with col3:
 #FIXEDBUG: Reset history to advoid stacking up old guesses
 if new_game:
     st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
+    st.session_state.secret = random.randint(low, high) # change 0,100 -> low, high to match difficulity
     st.session_state.status = "playing"   # 
     st.session_state.history = []         #
     st.success("New game started.")
