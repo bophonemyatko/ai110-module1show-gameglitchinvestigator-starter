@@ -25,8 +25,8 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 📝 Document Your Experience
 
-- [ ] Describe the game's purpose.
-- [ ] Detail which bugs you found.
+- [ Guess the secret number within the attempt allowed ] Describe the game's purpose.
+- [ Attempt allowed with difficulity level aren't consistent, first guess doesn't get registered as an attempt, hint were reversed, new game button doesn't work, after pressing new game button, the score doesn't get restarted, when changing difficulity the game didn't restart, randomized secret number range is not consistnet across difficulity ] Detail which bugs you found.
 - [ ] Explain what fixes you applied.
 
 ## 📸 Demo
