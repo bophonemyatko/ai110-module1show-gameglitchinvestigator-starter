@@ -8,21 +8,24 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
     It worked well. Nothing seems out of place. But the attempt left didn't get deduceted for the first time. 
 - List at least two concrete bugs you noticed at the start  
   (for example: "the secret number kept changing" or "the hints were backwards").
-    The hint was saying opposite. 
+    The hint was saying opposite. The first attempt didn't get recorded
 
 ---
 
 ## 2. How did you use AI as a teammate?
 
-- Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)?
+- Which AI tools did you use on this project (for example: ChatGPT, Gemini, Copilot)? Claude
 - Give one example of an AI suggestion that was correct (including what the AI suggested and how you verified the result).
+Changing lower and higher and I verified by actually playing the game. 
 - Give one example of an AI suggestion that was incorrect or misleading (including what the AI suggested and how you verified the result).
+
 
 ---
 
 ## 3. Debugging and testing your fixes
 
 - How did you decide whether a bug was really fixed?
+I test the specific bug that I fixed in the live application
 - Describe at least one test you ran (manual or using pytest)  
   and what it showed you about your code.
 - Did AI help you design or understand any tests? How?
@@ -41,5 +44,6 @@ Answer each question in 3 to 5 sentences. Be specific and honest about what actu
 
 - What is one habit or strategy from this project that you want to reuse in future labs or projects?
   - This could be a testing habit, a prompting strategy, or a way you used Git.
+  Commiting every time after editing
 - What is one thing you would do differently next time you work with AI on a coding task?
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
